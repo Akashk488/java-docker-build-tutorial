@@ -1,6 +1,6 @@
 #FROM adoptopenjdk/openjdk11:alpine-slim
 FROM openjdk:17-alpine
-ADD /var/lib/jenkins/workspace/First-job/target/java-docker-build-1.0.0-SNAPSHOT-shaded.jar
+ADD /var/lib/jenkins/workspace/First-job/target/java-docker-build-1.0.0-SNAPSHOT-shaded.jar java-docker-build-1.0.0-SNAPSHOT-shaded.jar
 
 RUN apk update && apk --no-cache add curl \
     && apk add busybox-extras \
