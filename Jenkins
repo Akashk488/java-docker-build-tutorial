@@ -18,8 +18,8 @@ pipeline{
 
         stage ('Docker Build'){
         steps{
-           sh 'docker build -t java-docker-build:v1 .'
-           sh 'docker run --name java-docker-build-c1 -p 8019:8123 -d java-docker-build:v1 '
+           sh 'sudo docker build -t java-docker-build:v1 .'
+           sh 'sudo docker run --name java-docker-build-c1 -p 8019:8123 -d java-docker-build:v1 '
             
         }
         }
