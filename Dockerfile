@@ -1,12 +1,26 @@
-#FROM adoptopenjdk/openjdk11:alpine-slim
-FROM openjdk:17-alpine
-ADD /var/lib/jenkins/workspace/First-job/target/java-docker-build-1.0.0-SNAPSHOT-shaded.jar java-docker-build-1.0.0-SNAPSHOT-shaded.jar
+# syntax=docker/dockerfile:1
 
-RUN apk update && apk --no-cache add curl \
-    && apk add busybox-extras \
-    && apk add --no-cache tzdata \
-    && apk add ttf-dejavu
-    
-ENV TZ Asia/Singapore
-EXPOSE 8123 
-ENTRYPOINT ["java","-Dspring.profiles.active=qa,docker","-jar","/java-docker-build-1.0.0-SNAPSHOT.jar"]
+# We use a multi-stage build setup.
+# (https://docs.docker.com/build/building/multi-stage/)
+
+# Stage 1 (to create a "build" image, ~360MB)
+FROM eclipse-temurin:17-jdk-alpine AS builder
+# smoke test to verify if java is available
+RUN java -version
+
+COPY . /usr/src/myapp/
+WORKDIR /usr/src/myapp/
+RUN set -Eeux \
+    && apk --no-cache add maven \
+    # smoke test to verify if maven is available
+    && mvn --version
+RUN mvn package
+
+# Stage 2 (to create a downsized "container executable", ~180MB)
+FROM eclipse-temurin:17-jre-alpine
+RUN apk --no-cache add ca-certificates
+WORKDIR /root/
+COPY --from=builder /usr/src/myapp/target/app.jar .
+
+EXPOSE 8123
+ENTRYPOINT ["java", "-jar", "./app.jar"]
