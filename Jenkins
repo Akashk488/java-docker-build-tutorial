@@ -4,6 +4,12 @@ pipeline{
         maven 'maven'
         
     }
+    environment {
+        DOCKER_REGISTRY = "akashk.azurecr.io"
+        DOCKER_IMAGE = "java-docker-build:latest"
+        AZURE_CREDENTIALS = credentials('docker-token')
+    }
+
     stages{
         stage ('checkout_scm'){
         steps{
@@ -17,28 +23,24 @@ pipeline{
         }
         }       
 
-        stage ('Docker Build'){
-        steps{
-            script{
-            withDockerRegistry(credentialsId: 'docker-token', url: 'https://akashk.azurecr.io') {
-                sh 'sudo docker build -t akashk.azurecr.io/java-docker-build:latest .'  
-                }  
-            
-        }
-        }
-        }
-
-        stage ('Docker push'){
-        steps{
-           script{
-            withDockerRegistry(credentialsId: 'docker-token', url: 'https://akashk.azurecr.io') {
-                sh 'sudo docker login -u $(username) -p $(password) akashk.azurecr.io'
-                sh 'sudo docker image push akashk.azurecr.io/java-docker-build:latest'
+        stages {
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build(DOCKER_IMAGE)
                 }
-           }
-            
+            }
         }
-        }
-    }   
 
+        stage('Push to ACR') {
+            steps {
+                script {
+                    docker.withRegistry("${DOCKER_REGISTRY}", "${AZURE_CREDENTIALS}") {
+                        docker.image(DOCKER_IMAGE).push()
+                    }
+                }
+            }
+    }   }
+
+}
 }
