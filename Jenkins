@@ -21,7 +21,7 @@ pipeline{
         steps{
             script{
             withDockerRegistry(credentialsId: 'docker-token', url: 'https://akashk.azurecr.io') {
-                sh 'sudo docker build -t akashk.azurecr.io/java-docker-build:v1 .'  
+                sh 'docker build -t akashk.azurecr.io/java-docker-build:latest .'  
                 }  
             
         }
@@ -32,7 +32,7 @@ pipeline{
         steps{
            script{
             withDockerRegistry(credentialsId: 'docker-token', url: 'https://akashk.azurecr.io') {
-                sh 'sudo docker push akashk.azurecr.io/java-docker-build:v1'
+                sh 'docker push akashk.azurecr.io/java-docker-build:latest'
                 }
            }
             
