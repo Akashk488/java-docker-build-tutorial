@@ -18,8 +18,22 @@ pipeline{
 
         stage ('Docker Build'){
         steps{
-           sh 'sudo docker build -t java-docker-build:v1 .'
-           sh 'sudo docker run --name java-docker-build-c1 -p 8123:8123 -d java-docker-build:v1 '
+            cript{
+            withDockerRegistry(credentialsId: 'docker-token', url: 'https://akashk.azurecr.io') {
+                sh 'sudo docker build -t akashk.azurecr.io/java-docker-build:v1 .'  
+                }
+           
+            
+        }
+        }
+
+        stage ('Docker push'){
+        steps{
+           script{
+            withDockerRegistry(credentialsId: 'docker-token', url: 'https://akashk.azurecr.io') {
+                sh 'sudo docker push akashk.azurecr.io/java-docker-build:v1 
+                }
+           }'
             
         }
         }
